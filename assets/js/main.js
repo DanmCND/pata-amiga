@@ -198,9 +198,11 @@
   /* ----------------------------------------------------------------------
      Trilha de pegadas na margem, ligada à rolagem
      Um cão e um gato descem juntos pela margem direita; ao subir a página,
-     as pegadas recuam. Só aparece quando há margem livre ao lado do conteúdo.
+     as pegadas recuam. Com margem larga, duas trilhas lado a lado; com margem
+     estreita (notebooks e tablets), uma trilha compacta alternando cão e gato.
      ---------------------------------------------------------------------- */
-  var MIN_MARGIN = 80;      // px livres à direita do conteúdo para mostrar a trilha
+  var MIN_MARGIN = 28;      // px livres à direita do conteúdo para mostrar a trilha
+  var WIDE_MARGIN = 110;    // a partir daqui, cão e gato andam lado a lado
   var REVEAL_AT = 0.62;     // pegadas aparecem até 62% da altura da janela
   var trailLayer = null;
   var trailPaws = [];
@@ -226,8 +228,9 @@
     var margin = pageWidth - contentRight;
     if (margin < MIN_MARGIN) return;
 
+    var compact = margin < WIDE_MARGIN;
     var cx = contentRight + margin / 2;
-    var amp = Math.min(22, margin / 2 - 34);
+    var amp = compact ? 0 : Math.min(22, margin / 2 - 34);
     var wave = 420;
     var startY = docTop(startNode) + 48;
     var endY = docTop(endNode) + 40;
@@ -260,13 +263,18 @@
         });
       }
     }
-    walk("dog", -13, 74, 7, startY);
-    walk("cat", 14, 66, 5, startY + 37);
+    if (compact) {
+      walk("dog", 0, 96, 2, startY);
+      walk("cat", 0, 96, 2, startY + 48);
+    } else {
+      walk("dog", -13, 74, 7, startY);
+      walk("cat", 14, 66, 5, startY + 37);
+    }
     paws.push({ kind: "heart", y: endY + 46, x: pathX(endY), r: 0 });
     paws.sort(function (a, b) { return a.y - b.y; });
 
     trailLayer = document.createElement("div");
-    trailLayer.className = "paw-trail";
+    trailLayer.className = "paw-trail" + (compact ? " is-compact" : "");
     trailLayer.setAttribute("aria-hidden", "true");
     paws.forEach(function (paw) {
       var node = document.createElement("span");

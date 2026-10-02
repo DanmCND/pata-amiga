@@ -1031,6 +1031,12 @@ main:focus { outline: none; }
           mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.7a4.3 4.3 0 0 1 7.5 2.6c0 5.6-7.5 10.2-7.5 10.2Z'/%3E%3C/svg%3E");
 }
 
+/* Trilha compacta para margens estreitas (notebooks com zoom, tablets) */
+.is-compact .paw { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; --o: 0.45; }
+.is-compact .paw-cat { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; --o: 0.55; }
+.is-compact .paw.on-dark { --o: 0.55; }
+.is-compact .paw-heart { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
+
 @media print {
   .paw-trail { display: none; }
 }
