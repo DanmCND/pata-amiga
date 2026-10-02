@@ -176,6 +176,152 @@
   });
 
   /* ----------------------------------------------------------------------
+     Pegadas em "Como funciona": aparecem quando a seção entra na tela
+     ---------------------------------------------------------------------- */
+  var steps = document.querySelector("[data-steps]");
+  if (steps) {
+    if ("IntersectionObserver" in window) {
+      var stepsObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            steps.classList.add("is-walking");
+            stepsObserver.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      stepsObserver.observe(steps);
+    } else {
+      steps.classList.add("is-walking");
+    }
+  }
+
+  /* ----------------------------------------------------------------------
+     Trilha de pegadas na margem, ligada à rolagem
+     Um cão e um gato descem juntos pela margem direita; ao subir a página,
+     as pegadas recuam. Só aparece quando há margem livre ao lado do conteúdo.
+     ---------------------------------------------------------------------- */
+  var MIN_MARGIN = 80;      // px livres à direita do conteúdo para mostrar a trilha
+  var REVEAL_AT = 0.62;     // pegadas aparecem até 62% da altura da janela
+  var trailLayer = null;
+  var trailPaws = [];
+  var trailShown = 0;
+
+  function docTop(node) {
+    return node.getBoundingClientRect().top + window.scrollY;
+  }
+
+  function buildTrail() {
+    if (trailLayer) trailLayer.remove();
+    trailLayer = null;
+    trailPaws = [];
+    trailShown = 0;
+
+    var reference = document.querySelector(".hero .container");
+    var startNode = document.querySelector(".hero");
+    var endNode = document.querySelector(".cta-card");
+    if (!reference || !startNode || !endNode) return;
+
+    var pageWidth = document.documentElement.clientWidth;
+    var contentRight = reference.getBoundingClientRect().right - parseFloat(getComputedStyle(reference).paddingRight);
+    var margin = pageWidth - contentRight;
+    if (margin < MIN_MARGIN) return;
+
+    var cx = contentRight + margin / 2;
+    var amp = Math.min(22, margin / 2 - 34);
+    var wave = 420;
+    var startY = docTop(startNode) + 48;
+    var endY = docTop(endNode) + 40;
+
+    var darkZones = Array.prototype.map.call(document.querySelectorAll(".section-sage"), function (node) {
+      var top = docTop(node);
+      return [top, top + node.offsetHeight];
+    });
+
+    function pathX(y) { return cx + amp * Math.sin((y - startY) / wave); }
+    function pathAngle(y) {
+      var slope = (amp / wave) * Math.cos((y - startY) / wave);
+      return 180 - Math.atan(slope) * 180 / Math.PI;
+    }
+    function isDark(y) {
+      return darkZones.some(function (zone) { return y > zone[0] && y < zone[1]; });
+    }
+
+    var paws = [];
+    function walk(kind, offset, stride, foot, firstY) {
+      for (var y = firstY, i = 0; y < endY; y += stride, i++) {
+        var side = i % 2 ? 1 : -1;
+        var angle = pathAngle(y);
+        var rad = (angle - 180) * Math.PI / 180;
+        paws.push({
+          kind: kind,
+          y: y,
+          x: pathX(y) + offset * Math.cos(rad) + side * foot * Math.cos(rad),
+          r: angle + side * 6
+        });
+      }
+    }
+    walk("dog", -13, 74, 7, startY);
+    walk("cat", 14, 66, 5, startY + 37);
+    paws.push({ kind: "heart", y: endY + 46, x: pathX(endY), r: 0 });
+    paws.sort(function (a, b) { return a.y - b.y; });
+
+    trailLayer = document.createElement("div");
+    trailLayer.className = "paw-trail";
+    trailLayer.setAttribute("aria-hidden", "true");
+    paws.forEach(function (paw) {
+      var node = document.createElement("span");
+      node.className = "paw" + (paw.kind === "cat" ? " paw-cat" : "") + (paw.kind === "heart" ? " paw-heart" : "") + (paw.kind !== "heart" && isDark(paw.y) ? " on-dark" : "");
+      node.style.left = paw.x.toFixed(1) + "px";
+      node.style.top = paw.y.toFixed(1) + "px";
+      node.style.setProperty("--r", paw.r.toFixed(1) + "deg");
+      trailLayer.appendChild(node);
+      trailPaws.push({ y: paw.y, node: node });
+    });
+    document.body.appendChild(trailLayer);
+    updateTrail();
+  }
+
+  function updateTrail() {
+    if (!trailPaws.length) return;
+    var limit = window.scrollY + window.innerHeight * REVEAL_AT;
+    while (trailShown < trailPaws.length && trailPaws[trailShown].y < limit) {
+      trailPaws[trailShown++].node.classList.add("is-on");
+    }
+    while (trailShown > 0 && trailPaws[trailShown - 1].y >= limit) {
+      trailPaws[--trailShown].node.classList.remove("is-on");
+    }
+  }
+
+  var trailFrame = 0;
+  window.addEventListener("scroll", function () {
+    if (trailFrame) return;
+    trailFrame = window.requestAnimationFrame(function () {
+      trailFrame = 0;
+      updateTrail();
+    });
+  }, { passive: true });
+
+  // Reconstrói quando o layout muda (resize, fontes carregadas, FAQ aberto/fechado)
+  var trailTimer = 0;
+  var lastLayout = "";
+  function scheduleTrail() {
+    window.clearTimeout(trailTimer);
+    trailTimer = window.setTimeout(function () {
+      var layout = document.documentElement.clientWidth + "x" + document.body.offsetHeight;
+      if (layout === lastLayout) return;
+      lastLayout = layout;
+      buildTrail();
+    }, 150);
+  }
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(scheduleTrail).observe(document.body);
+  } else {
+    window.addEventListener("resize", scheduleTrail);
+  }
+  window.addEventListener("load", scheduleTrail);
+  scheduleTrail();
+
+  /* ----------------------------------------------------------------------
      Ano no rodapé
      ---------------------------------------------------------------------- */
   document.querySelectorAll("[data-year]").forEach(function (node) {

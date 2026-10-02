@@ -36,6 +36,10 @@
   --gutter: clamp(1rem, 4vw, 2rem);
   --section-space: clamp(4rem, 9vw, 7rem);
   --header-h: 72px;
+
+  /* Pegadas (usadas como máscara, a cor vem do background) */
+  --paw-dog: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 15.5c-4.6 0-8.6 4.6-8.6 8.7 0 2.7 2.1 3.8 4.4 3.8 1.7 0 2.7-.9 4.2-.9s2.5.9 4.2.9c2.3 0 4.4-1.1 4.4-3.8 0-4.1-4-8.7-8.6-8.7Z'/%3E%3Cellipse cx='6' cy='13.2' rx='2.6' ry='3.5' transform='rotate(-22 6 13.2)'/%3E%3Cellipse cx='11.6' cy='7.4' rx='2.8' ry='3.8' transform='rotate(-8 11.6 7.4)'/%3E%3Cellipse cx='20.4' cy='7.4' rx='2.8' ry='3.8' transform='rotate(8 20.4 7.4)'/%3E%3Cellipse cx='26' cy='13.2' rx='2.6' ry='3.5' transform='rotate(22 26 13.2)'/%3E%3C/svg%3E");
+  --paw-cat: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 16.5c-4 0-7.5 3.3-7.5 6.8 0 2.6 1.9 4.2 4.2 4.2 1.4 0 2.2-.7 3.3-.7s1.9.7 3.3.7c2.3 0 4.2-1.6 4.2-4.2 0-3.5-3.5-6.8-7.5-6.8Z'/%3E%3Ccircle cx='7.6' cy='14.2' r='2.7'/%3E%3Ccircle cx='12.6' cy='9.4' r='2.8'/%3E%3Ccircle cx='19.4' cy='9.4' r='2.8'/%3E%3Ccircle cx='24.4' cy='14.2' r='2.7'/%3E%3C/svg%3E");
 }
 
 /* --------------------------------------------------------------------------
@@ -235,19 +239,6 @@ main:focus { outline: none; }
   color: var(--texto-suave);
   font-style: italic;
 }
-
-.placeholder-box {
-  margin-top: 1.75rem;
-  padding: 1.25rem 1.4rem;
-  border: 2px dashed rgba(97, 117, 104, 0.55);
-  border-radius: 20px;
-  background: rgba(247, 241, 232, 0.6);
-  display: grid;
-  gap: 0.3rem;
-  font-size: 0.9375rem;
-  color: var(--texto-suave);
-}
-.placeholder-box strong { color: var(--chocolate); }
 
 .section { padding-block: var(--section-space); }
 
@@ -636,19 +627,25 @@ main:focus { outline: none; }
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 2rem;
-  counter-reset: none;
+  gap: 2.25rem;
 }
 
+/* Celular: número à esquerda, texto à direita; as pegadas descem pela coluna do número */
 .step {
   position: relative;
-  padding-top: 0.25rem;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  column-gap: 1.25rem;
+  align-items: start;
 }
 
-.step h3 { margin: 1rem 0 0.5rem; }
-.step p { color: var(--texto-suave); max-width: 22rem; }
+.step-number { grid-row: 1 / span 2; }
+.step h3 { margin: 0.7rem 0 0.4rem; }
+.step p { grid-column: 2; color: var(--texto-suave); max-width: 22rem; }
 
 .step-number {
+  position: relative;
+  z-index: 1;
   display: inline-grid;
   place-items: center;
   width: 52px;
@@ -660,19 +657,67 @@ main:focus { outline: none; }
   font: 700 1.25rem/1 var(--font-display);
 }
 
+/* Trilha de patinhas entre as etapas (linha de vínculo) */
+.step-trail {
+  position: absolute;
+  top: 60px;
+  bottom: -2.25rem;
+  left: 26px;
+  width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  pointer-events: none;
+}
+
+.step-trail i {
+  --r: 180deg;
+  display: block;
+  width: 18px;
+  height: 18px;
+  background: var(--salvia);
+  -webkit-mask: var(--paw-cat) center / contain no-repeat;
+          mask: var(--paw-cat) center / contain no-repeat;
+  transform: translateX(-5px) rotate(var(--r));
+  opacity: 0.55;
+}
+.step-trail i:nth-child(even) { transform: translateX(5px) rotate(var(--r)); }
+
 @media (min-width: 768px) {
   .steps { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
 
-  /* Linha de vínculo entre as etapas */
-  .step:not(:last-child)::after {
-    content: "";
-    position: absolute;
+  .step { display: block; padding-top: 0.25rem; }
+  .step h3 { margin: 1rem 0 0.5rem; }
+
+  .step-trail {
     top: calc(0.25rem + 26px);
+    bottom: auto;
     left: 64px;
-    right: -1.5rem;
+    right: -1.75rem;
+    width: auto;
     height: 0;
-    border-top: 2px dashed rgba(97, 117, 104, 0.45);
+    flex-direction: row;
   }
+
+  .step-trail i { --r: 90deg; transform: translateY(-5px) rotate(var(--r)); }
+  .step-trail i:nth-child(even) { transform: translateY(5px) rotate(var(--r)); }
+}
+
+/* Animação: as patinhas aparecem em sequência quando a seção entra na tela */
+@media (prefers-reduced-motion: no-preference) {
+  .js .step-trail i {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .js .steps.is-walking .step-trail i { opacity: 0.55; }
+
+  .js .steps.is-walking .step:nth-child(1) .step-trail i:nth-child(1) { transition-delay: 0.2s; }
+  .js .steps.is-walking .step:nth-child(1) .step-trail i:nth-child(2) { transition-delay: 0.45s; }
+  .js .steps.is-walking .step:nth-child(1) .step-trail i:nth-child(3) { transition-delay: 0.7s; }
+  .js .steps.is-walking .step:nth-child(2) .step-trail i:nth-child(1) { transition-delay: 1.05s; }
+  .js .steps.is-walking .step:nth-child(2) .step-trail i:nth-child(2) { transition-delay: 1.3s; }
+  .js .steps.is-walking .step:nth-child(2) .step-trail i:nth-child(3) { transition-delay: 1.55s; }
 }
 
 /* --------------------------------------------------------------------------
@@ -699,8 +744,22 @@ main:focus { outline: none; }
 .space-copy h2 { margin-bottom: 1.25rem; }
 .space-copy > p { color: var(--texto-suave); }
 
+.space-grid-team { margin-top: clamp(3.5rem, 8vw, 6rem); }
+
+.team-title {
+  font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Na foto da equipe, o canto orgânico fica do lado oposto ao da fachada */
+.team-media img {
+  border-radius: var(--radius-media) var(--radius-media) 90px var(--radius-media);
+}
+
 @media (min-width: 1024px) {
   .space-grid { grid-template-columns: 1.15fr 1fr; }
+  .space-grid-team { grid-template-columns: 1fr 1.15fr; }
 }
 
 /* --------------------------------------------------------------------------
@@ -910,6 +969,70 @@ main:focus { outline: none; }
 
 @media (min-width: 768px) {
   .footer-inner { grid-template-columns: 1.4fr 1fr 1fr; }
+}
+
+/* --------------------------------------------------------------------------
+   Trilha de pegadas na margem (telas largas)
+   Um cão e um gato caminham juntos conforme a rolagem e a trilha termina
+   em um coração no contato. Gerada por main.js somente quando há margem livre.
+   -------------------------------------------------------------------------- */
+
+.paw-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.paw {
+  --r: 180deg;
+  --o: 0.3;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  background: var(--salvia);
+  -webkit-mask: var(--paw-dog) center / contain no-repeat;
+          mask: var(--paw-dog) center / contain no-repeat;
+  opacity: 0;
+  transform: rotate(var(--r)) scale(0.6);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.paw-cat {
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 -7.5px;
+  background: var(--terracota);
+  --o: 0.38;
+  -webkit-mask-image: var(--paw-cat);
+          mask-image: var(--paw-cat);
+}
+
+/* Sobre a seção sálvia, as pegadas ficam claras */
+.paw.on-dark { background: var(--creme); --o: 0.4; }
+
+.paw.is-on {
+  opacity: var(--o);
+  transform: rotate(var(--r)) scale(1);
+}
+
+.paw-heart {
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  background: var(--terracota);
+  --o: 0.9;
+  --r: 0deg;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.7a4.3 4.3 0 0 1 7.5 2.6c0 5.6-7.5 10.2-7.5 10.2Z'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.7a4.3 4.3 0 0 1 7.5 2.6c0 5.6-7.5 10.2-7.5 10.2Z'/%3E%3C/svg%3E");
+}
+
+@media print {
+  .paw-trail { display: none; }
 }
 
 /* --------------------------------------------------------------------------

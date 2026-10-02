@@ -18,7 +18,13 @@ python3 -m http.server 8080
 index.html               Página completa
 assets/css/styles.css    Tokens de cor/tipografia e estilos (mobile first)
 assets/js/config.js      Dados de contato: WhatsApp, telefone, endereço, horários, redes
-assets/js/main.js        Menu móvel, CTAs e preenchimento dos dados de contato
+assets/js/main.js        Menu móvel, CTAs, dados de contato e trilha de pegadas
 assets/img/              Imagens otimizadas (WebP + fallback JPG/PNG), favicon e imagem de compartilhamento
 ```
 
+
+## Efeitos de pegadas
+
+- **Margem (telas a partir de ~1280 px):** um cão e um gato caminham pela margem direita conforme a rolagem; ao subir, as pegadas recuam. A trilha termina em um coração ao lado do contato. Ajustes: `MIN_MARGIN`, `REVEAL_AT` e as chamadas `walk(...)` em `main.js`.
+- **"Como funciona" (todas as telas):** patinhas ligam uma etapa à outra quando a seção aparece.
+- As pegadas são decorativas (`aria-hidden`) e respeitam "reduzir movimento".

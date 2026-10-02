@@ -184,14 +184,16 @@
           <h2 id="como-titulo">Um atendimento tranquilo, do primeiro oi ao retorno para casa</h2>
         </div>
 
-        <ol class="steps" role="list">
+        <ol class="steps" role="list" data-steps>
           <li class="step">
             <span class="step-number" aria-hidden="true">1</span>
+            <span class="step-trail" aria-hidden="true"><i></i><i></i><i></i></span>
             <h3>Conhecer</h3>
             <p>Você conta para a gente sobre o seu pet, a rotina dele e o que ele precisa.</p>
           </li>
           <li class="step">
             <span class="step-number" aria-hidden="true">2</span>
+            <span class="step-trail" aria-hidden="true"><i></i><i></i><i></i></span>
             <h3>Cuidar</h3>
             <p>Combinamos o serviço e cuidamos com atenção individual, no ritmo do seu pet.</p>
           </li>
@@ -219,13 +221,23 @@
           <p class="eyebrow">Equipe e espaço</p>
           <h2 id="espaco-titulo">Um lugar pensado para receber pets e tutores com calma</h2>
           <p>Um ambiente acolhedor, com luz natural, cantinhos de descanso e produtos para a rotina do seu pet. Venha conhecer o espaço e conversar com a equipe.</p>
-
-          <!-- Substituir pelo conteúdo real da equipe: assets/img/equipe.jpg + nomes e funções -->
-          <div class="placeholder-box" role="note">
-            <strong>Foto e apresentação da equipe</strong>
-            <span>Espaço reservado para uma foto real da equipe (<code>assets/img/equipe.jpg</code>) com nomes e funções confirmados.</span>
-          </div>
         </div>
+      </div>
+
+      <div class="container space-grid space-grid-team">
+        <div class="space-copy">
+          <h3 class="team-title">Quem cuida do seu pet</h3>
+          <p>Uma equipe apaixonada por animais e comprometida com o bem-estar de cada pet. Venha conhecer quem vai cuidar do seu cão ou gato.</p>
+          <!-- Quando confirmados, incluir aqui nomes e funções da equipe. -->
+        </div>
+
+        <figure class="space-media team-media">
+          <picture>
+            <source type="image/webp" srcset="assets/img/equipe-800.webp 800w, assets/img/equipe-1400.webp 1400w" sizes="(min-width: 1024px) 56vw, 100vw">
+            <img src="assets/img/equipe-800.jpg" srcset="assets/img/equipe-800.jpg 800w, assets/img/equipe-1400.jpg 1400w" sizes="(min-width: 1024px) 56vw, 100vw" alt="Equipe da Pata Amiga com camisetas da marca, sorrindo dentro da loja, junto de quatro cães usando bandanas verdes." width="1400" height="1050" loading="lazy" decoding="async">
+          </picture>
+          <figcaption class="media-note">Imagem ilustrativa da equipe</figcaption>
+        </figure>
       </div>
     </section>
 
