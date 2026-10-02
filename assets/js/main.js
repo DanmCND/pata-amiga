@@ -220,7 +220,7 @@
 
     var reference = document.querySelector(".hero .container");
     var startNode = document.querySelector(".hero");
-    var endNode = document.querySelector(".cta-card");
+    var endNode = document.querySelector("#contato"); // seção estável (o card tem animação de entrada)
     if (!reference || !startNode || !endNode) return;
 
     var pageWidth = document.documentElement.clientWidth;
@@ -328,6 +328,97 @@
   }
   window.addEventListener("load", scheduleTrail);
   scheduleTrail();
+
+  /* ----------------------------------------------------------------------
+     Efeitos de rolagem: revelação, progresso de leitura e parallax
+     ---------------------------------------------------------------------- */
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Revelação: cada grupo entra em cascata. Só esconde algo se o observer existir.
+  var REVEAL_GROUPS = [
+    { selector: ".section-head", step: 0 },
+    { selector: ".services-grid > li", step: 0.1 },
+    { selector: ".about-copy", step: 0 },
+    { selector: ".about-cards > .card", step: 0.12 },
+    { selector: ".steps > .step", step: 0.15 },
+    { selector: ".space-media", step: 0, type: "zoom" },
+    { selector: ".space-copy", step: 0 },
+    { selector: ".faq-list > .faq-item", step: 0.07 },
+    { selector: ".cta-card", step: 0, type: "zoom" },
+    { selector: ".contact-list > .contact-item", step: 0.08 },
+    { selector: ".footer-inner > *", step: 0.1 }
+  ];
+
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    var revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        revealObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+
+    REVEAL_GROUPS.forEach(function (group) {
+      document.querySelectorAll(group.selector).forEach(function (node, index) {
+        // O que já está visível ao carregar não pisca
+        if (node.getBoundingClientRect().top < window.innerHeight * 0.9) return;
+        node.setAttribute("data-reveal", group.type || "up");
+        if (group.step) node.style.setProperty("--reveal-delay", (index % 4) * group.step + "s");
+        revealObserver.observe(node);
+      });
+    });
+    document.documentElement.classList.add("motion");
+  }
+
+  // Progresso de leitura e parallax da foto do hero
+  var progressBar = document.querySelector("[data-progress]");
+  var parallax = document.querySelector("[data-parallax]");
+  var effectsFrame = 0;
+
+  function updateScrollEffects() {
+    effectsFrame = 0;
+    var scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    if (progressBar) {
+      progressBar.style.setProperty("--progress", scrollable > 0 ? Math.min(1, window.scrollY / scrollable).toFixed(4) : "0");
+    }
+    if (parallax && !reduceMotion && window.scrollY < window.innerHeight * 1.2) {
+      parallax.style.setProperty("--parallax", Math.min(18, window.scrollY * 0.05).toFixed(1) + "px");
+    }
+  }
+
+  window.addEventListener("scroll", function () {
+    if (!effectsFrame) effectsFrame = window.requestAnimationFrame(updateScrollEffects);
+  }, { passive: true });
+  window.addEventListener("resize", updateScrollEffects);
+  updateScrollEffects();
+
+  // Brilho que acompanha o cursor nos cards de serviço
+  if (window.matchMedia("(hover: hover)").matches) {
+    document.querySelectorAll(".service-card").forEach(function (card) {
+      card.addEventListener("pointermove", function (event) {
+        var rect = card.getBoundingClientRect();
+        card.style.setProperty("--mx", (event.clientX - rect.left) + "px");
+        card.style.setProperty("--my", (event.clientY - rect.top) + "px");
+      });
+    });
+  }
+
+  // Menu destaca a seção que está na tela
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-list a[href^='#']"));
+  if (navLinks.length && "IntersectionObserver" in window) {
+    var spyObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        navLinks.forEach(function (link) {
+          link.classList.toggle("is-current", link.getAttribute("href") === "#" + entry.target.id);
+        });
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    navLinks.forEach(function (link) {
+      var section = document.querySelector(link.getAttribute("href"));
+      if (section) spyObserver.observe(section);
+    });
+  }
 
   /* ----------------------------------------------------------------------
      Ano no rodapé

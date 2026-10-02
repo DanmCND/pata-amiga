@@ -1042,6 +1042,241 @@ main:focus { outline: none; }
 }
 
 /* --------------------------------------------------------------------------
+   Efeitos e micro-interações
+   Tudo aqui é decorativo: com "reduzir movimento" ou sem JS, o conteúdo
+   aparece normalmente, sem animação.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --ease-out: cubic-bezier(0.22, 0.8, 0.24, 1);
+  --ease-soft: cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+/* Barra de progresso da leitura */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  height: 3px;
+  background: linear-gradient(90deg, var(--terracota) 0%, var(--pessego) 100%);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--progress, 0));
+  pointer-events: none;
+}
+
+/* Fotos com moldura que recorta o zoom */
+.space-media picture {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-media) var(--radius-media) var(--radius-media) 90px;
+}
+.team-media picture {
+  border-radius: var(--radius-media) var(--radius-media) 90px var(--radius-media);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* ---------- Hero: entrada coreografada (só CSS, roda mesmo sem JS) ---------- */
+  .hero-copy > * {
+    animation: rise-in 0.9s var(--ease-out) both;
+  }
+  .hero-copy > :nth-child(1) { animation-delay: 0.05s; }
+  .hero-copy > :nth-child(2) { animation-delay: 0.15s; }
+  .hero-copy > :nth-child(3) { animation-delay: 0.3s; }
+  .hero-copy > :nth-child(4) { animation-delay: 0.45s; }
+
+  .hero-photo {
+    animation: photo-in 1.2s var(--ease-out) 0.2s both;
+  }
+
+  .bond-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-line 1.4s var(--ease-soft) 0.9s forwards;
+  }
+
+  .bond-heart {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: heart-pop 0.6s var(--ease-out) 2.1s both;
+  }
+
+  .hero::before {
+    animation: glow-in 1.6s ease 0.1s both;
+  }
+
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(26px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes photo-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.95); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes draw-line {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes heart-pop {
+    0% { opacity: 0; transform: scale(0.2); }
+    60% { opacity: 1; transform: scale(1.25); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes glow-in {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Parallax suave da foto dentro da moldura (main.js define --parallax) */
+  .hero-photo img {
+    transform: translateY(var(--parallax, 0px)) scale(1.08);
+    will-change: transform;
+  }
+
+  /* ---------- Revelação na rolagem (main.js marca os elementos) ---------- */
+  .motion [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.8s var(--ease-out) var(--reveal-delay, 0s),
+      transform 0.8s var(--ease-out) var(--reveal-delay, 0s);
+  }
+  .motion [data-reveal="zoom"] { transform: translateY(20px) scale(0.96); }
+  .motion [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- Botões ---------- */
+  .btn {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s var(--ease-out), box-shadow 0.25s ease;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 12px 24px -12px rgba(178, 93, 58, 0.7);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+  .btn-primary:hover .icon-heart {
+    animation: heartbeat 0.9s ease-in-out infinite;
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.25); }
+    45% { transform: scale(0.95); }
+    65% { transform: scale(1.15); }
+  }
+
+  /* ---------- Cards de serviço ---------- */
+  .service-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s var(--ease-out), box-shadow 0.4s ease;
+  }
+  .service-card > * { position: relative; }
+  .service-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(233, 183, 160, 0.32), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .service-icon {
+    transition: background-color 0.35s ease, color 0.35s ease, transform 0.45s var(--ease-out), border-radius 0.45s ease;
+  }
+
+  @media (hover: hover) {
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 1px 2px rgba(51, 41, 35, 0.05), 0 26px 44px -22px rgba(51, 41, 35, 0.32);
+    }
+    .service-card:hover::before { opacity: 1; }
+    .service-card:hover .service-icon {
+      background: var(--salvia);
+      color: var(--branco);
+      transform: rotate(-6deg) scale(1.06);
+      border-radius: 22px 18px 22px 18px;
+    }
+
+    /* Fotos: zoom sutil */
+    .space-media img {
+      transition: transform 0.9s var(--ease-out);
+    }
+    .space-media:hover img { transform: scale(1.04); }
+
+    /* Cards da seção sálvia */
+    .card-on-sage {
+      transition: transform 0.4s var(--ease-out);
+    }
+    .card-on-sage:hover { transform: translateY(-4px); }
+  }
+
+  /* ---------- Como funciona: números se preenchem em sequência ---------- */
+  .step-number {
+    transition: background-color 0.5s ease, color 0.5s ease, transform 0.5s var(--ease-out);
+  }
+  .js .steps.is-walking .step-number {
+    background: var(--salvia);
+    color: var(--branco);
+    animation: number-pop 0.6s var(--ease-out) both;
+  }
+  .js .steps.is-walking .step:nth-child(1) .step-number { transition-delay: 0s; animation-delay: 0s; }
+  .js .steps.is-walking .step:nth-child(2) .step-number { transition-delay: 0.9s; animation-delay: 0.9s; }
+  .js .steps.is-walking .step:nth-child(3) .step-number { transition-delay: 1.8s; animation-delay: 1.8s; }
+  @keyframes number-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.14); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- FAQ: abre deslizando (navegadores com suporte) ---------- */
+  :root { interpolate-size: allow-keywords; }
+  .faq-item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size 0.4s var(--ease-soft), content-visibility 0.4s allow-discrete;
+  }
+  .faq-item[open]::details-content { block-size: auto; }
+  .faq-item summary::after { transition: transform 0.35s var(--ease-out); }
+  .faq-item[open] summary::after { transform: rotate(180deg); }
+  .faq-item {
+    transition: box-shadow 0.3s ease;
+  }
+  .faq-item[open] {
+    box-shadow: 0 1px 2px rgba(51, 41, 35, 0.04), 0 18px 36px -18px rgba(51, 41, 35, 0.25);
+  }
+
+  /* ---------- Links ---------- */
+  .nav-list a { position: relative; }
+  @media (min-width: 960px) {
+    .nav-list a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 8px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--terracota);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.35s var(--ease-out);
+    }
+    .nav-list a:hover::after,
+    .nav-list a.is-current::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
    Movimento reduzido
    -------------------------------------------------------------------------- */
 

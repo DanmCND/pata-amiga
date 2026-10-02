@@ -30,6 +30,7 @@
 </head>
 <body>
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <div class="scroll-progress" aria-hidden="true" data-progress></div>
 
   <!-- 1. Cabeçalho -->
   <header class="site-header" data-header>
@@ -78,14 +79,14 @@
         </div>
 
         <figure class="hero-media">
-          <div class="hero-photo">
+          <div class="hero-photo" data-parallax>
             <picture>
               <source srcset="assets/img/hero-cao-gato.webp" type="image/webp">
               <img src="assets/img/hero-cao-gato.jpg" alt="Um cão golden de olhos fechados encosta a cabeça em um gato rajado, os dois tranquilos e próximos." width="556" height="396" fetchpriority="high">
             </picture>
           </div>
           <svg class="bond-line" viewBox="0 0 220 120" aria-hidden="true" focusable="false">
-            <path d="M4 110C40 108 70 92 92 66s52-50 92-36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path class="bond-path" pathLength="1" d="M4 110C40 108 70 92 92 66s52-50 92-36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path class="bond-heart" d="M196 24s-12-7.4-12-16.3A6.9 6.9 0 0 1 196 3.6a6.9 6.9 0 0 1 12 4.1C208 16.6 196 24 196 24Z"/>
           </svg>
           <figcaption class="media-note">Imagem ilustrativa</figcaption>
